@@ -494,7 +494,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
                               padding: const EdgeInsets.only(
                                   top: 0, right: 30, bottom: 20),
                               child: Container(
-                                height: 446,
+                                height: 515,
                                 decoration: BoxDecoration(
                                   border: Border.all(color: Colors.white10),
                                   boxShadow: [

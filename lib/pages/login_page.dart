@@ -168,8 +168,7 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.black), // Warna outline hitam
+                            borderSide: BorderSide(color: Colors.black),// Warna outline hitam
                             borderRadius: BorderRadius.circular(12),
                           ),
                           fillColor: Colors.white,
@@ -267,6 +266,7 @@ class _LoginPageState extends State<LoginPage> {
                             'Masuk Sekarang',
                             style: TextStyle(
                               fontFamily: 'Poppins',
+                              color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),
