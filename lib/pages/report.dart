@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:monitoringdesa_app/Widgets/AppHeader.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:monitoringdesa_app/Models/work_model.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class report extends StatefulWidget {
   report({Key? key}) : super(key: key);
@@ -13,6 +16,42 @@ class _reportState extends State<report> {
   String selectedYear = "2023";
   String searchText = '';
   String selectedStatus = 'Semua Data';
+  late List<ProgramKerja> prokerData;
+
+  @override
+  @override
+  void initState() {
+    super.initState();
+    prokerData = [];
+    fetchDataTable().then((programKerjas) {
+      setState(() {
+        prokerData = programKerjas;
+      });
+    });
+  }
+
+   Future<List<ProgramKerja>> fetchDataTable() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://kegiatanpendarungan.id/api/v1/proker'),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = json.decode(response.body)['data'];
+
+        List<ProgramKerja> programKerjas = responseData
+            .map((programJson) => ProgramKerja.fromJson(programJson))
+            .toList();
+
+        return programKerjas;
+      } else {
+        throw Exception('Gagal memuat data');
+      }
+    } catch (error) {
+      print('Error fetching data: $error');
+      throw error;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
