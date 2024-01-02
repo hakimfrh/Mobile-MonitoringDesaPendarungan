@@ -31,9 +31,10 @@ class ProgramKerja {
       judul: json['judul'],
       tanggal: json['tanggal'],
       fundsName: json['fundsName'],
-      jumlahAnggaran: json['jumlahAnggaran'],
-      jumlahRealisasi: json['jumlahRealisasi'],
-      sisaDana: json['jumlahAnggaran'] - json['jumlahRealisasi'],
+      jumlahAnggaran: int.parse(json['jumlahAnggaran'].toString()),
+      jumlahRealisasi: int.parse(json['jumlahRealisasi'].toString()),
+      sisaDana: int.parse(json['jumlahAnggaran'].toString()) -
+          int.parse(json['jumlahRealisasi'].toString()),
       status: json['status'],
       deskripsi: json['deskripsi'] ?? '',
       hambatan: json['hambatan'] ?? '',

@@ -8,7 +8,7 @@ class tittle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Padding(
-        padding: const EdgeInsets.only(top: 27, left: 20, right: 20),
+        padding: const EdgeInsets.only(top: 24.5, left: 20, right: 20),
         child: Container(
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(

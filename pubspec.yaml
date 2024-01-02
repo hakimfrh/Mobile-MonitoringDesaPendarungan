@@ -1,4 +1,4 @@
-name: monitoringdesa_app
+name: KegiatanPendarungan
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -38,8 +38,9 @@ dependencies:
   curved_navigation_bar: ^1.0.3
   percent_indicator: ^4.2.3
   bcrypt: ^1.1.3
-  # flutter_statusbarcolor: ^0.2.3
-  # http: ^0.13.3
+  csv: ^5.1.1
+  # path_provider: ^2.1.1
+  # downloads_path_provider: ^2.1.2
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +50,7 @@ flutter_icons:
   android: "launcher_icon"
   ios: true
   flutter_lints: ^2.0.0
+  image_path: "lib/assets/images/logo.jpg"
 
 flutter:
   assets:
@@ -81,6 +83,8 @@ flutter:
     - lib/assets/images/gambardashboard3.jpeg
     - lib/assets/images/gambarpendarungan.jpeg
     - lib/assets/images/down-arrow.png
+    - lib/assets/images/logo.jpg
+
 
   fonts:
     - family: Poppins

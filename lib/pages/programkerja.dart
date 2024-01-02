@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:monitoringdesa_app/Widgets/AppHeader.dart';
+import 'package:KegiatanPendarungan/Widgets/AppHeader.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:monitoringdesa_app/Models/user_model.dart';
 
 class Proker extends StatefulWidget {
   Proker({Key? key}) : super(key: key);
@@ -16,38 +15,45 @@ class _ProkerState extends State<Proker> {
   String selectedYear = "2023";
   String searchText = '';
   List<dynamic> prokerData = [];
-    late User user;
+  late List<Map<String, dynamic>> userData;
 
   @override
   void initState() {
     super.initState();
     fetchData();
     fetchUserData();
-    user = User(id: 0, fullname: '', email: '', password: '', roleuser: '');
+    userData = [];
   }
 
 //data pengguna untuk login
-Future<void> fetchUserData() async {
-  try {
-    final response = await http.get(Uri.parse('https://kegiatanpendarungan.id/api/v1/users'));
+  Future<void> fetchUserData() async {
+    final response = await http
+        .get(Uri.parse('https://kegiatanpendarungan.id/api/v1/users'));
+
     if (response.statusCode == 200) {
-      final List<dynamic> userData = json.decode(response.body)['data'];
-      final Map<String, dynamic> currentUserData = userData.firstWhere(
-        (user) => user['roleuser'] == 'pejabatdesa',
-      );
-
-      print('Data Pengguna: $currentUserData');
-
+      final Map<String, dynamic> data = json.decode(response.body);
       setState(() {
-        user = User.fromJson(currentUserData);
+        userData = List<Map<String, dynamic>>.from(data['data']);
+
+        // Periksa apakah ada user dengan role "pejabatdesa"
+        bool isPejabatDesa =
+            userData.any((user) => user['roleuser'] == 'pejabatdesa');
+        String userName = isPejabatDesa
+            ? userData.firstWhere((user) => user['roleuser'] == 'pejabatdesa',
+                orElse: () => {'fullname': ''})['fullname']
+            : '';
+
+        if (isPejabatDesa) {
+          print('User has role pejabatdesa');
+          print('Selamat pagi, @$userName!');
+        } else {
+          print('User role is not pejabatdesa');
+        }
       });
     } else {
-      throw Exception('Gagal mengambil data pengguna');
+      throw Exception('Failed to load user data');
     }
-  } catch (error) {
-    print('Error fetching user data: $error');
   }
-}
 
 // data untuk Table
   Future<void> fetchData() async {
@@ -192,18 +198,54 @@ Future<void> fetchUserData() async {
           tittle(), // App header
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top:24),
+              padding: const EdgeInsets.only(top: 24),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   Padding(
-                    padding: const EdgeInsets.only(left: 20),
-                    child: Text(
-                      'Selamat pagi, ${user.fullname}!',
-                      style: TextStyle(fontSize: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        top: 1,
+                      ),
+                      child: Builder(
+                        builder: (context) {
+                          print('userData: $userData');
+                          if (userData.isNotEmpty) {
+                            print('User data is not empty');
+                            print(
+                                'UserData Roles: ${userData.map((user) => user['roleuser'])}');
+
+                            bool isPejabatDesa = userData.any((user) =>
+                                    user['roleuser'] == 'pejabatdesa') ??
+                                false;
+                            String userName = isPejabatDesa
+                                ? userData.firstWhere((user) =>
+                                    user['roleuser'] ==
+                                    'pejabatdesa')['fullname']
+                                : (userData.isNotEmpty
+                                    ? userData[0]['fullname']
+                                    : '');
+
+                            if (isPejabatDesa) {
+                              print('User has role pejabatdesa');
+                              return Text(
+                                'Selamat pagi, ${isPejabatDesa ? '@$userName' : ''}!',
+                                style: TextStyle(fontSize: 20),
+                              );
+                            } else {
+                              print('User role is not pejabatdesa');
+                            }
+                          } else {
+                            print('User data is empty');
+                          }
+                          return Text(
+                            'Selamat pagi!',
+                            style: TextStyle(fontSize: 20),
+                          );
+                        },
+                      ),
                     ),
-                  ),
                     Padding(
                       padding: const EdgeInsets.only(left: 20, top: 16),
                       child: Text(
@@ -541,7 +583,7 @@ class DetailProgramKerja extends StatelessWidget {
       statusText = 'Selesai';
     } else if (status.toUpperCase() == 'PROGRESS' ||
         status.toUpperCase() == 'PROSES') {
-      backgroundColor = Color.fromARGB(255, 219, 236, 174);
+      backgroundColor = Color.fromARGB(255, 200, 214, 155);
       textColor = Colors.yellow;
       statusText = 'Proses';
     } else {
@@ -599,29 +641,22 @@ class DetailProgramKerja extends StatelessWidget {
         ],
       );
     } else if (label == 'Dokumentasi Program Kerja') {
-      // Pisahkan URL dengan koma dan titik koma (asumsi beberapa URL dipisahkan dengan koma dan titik koma)
       List<String> imageUrls =
           value.split(RegExp(r'[;,]')).map((e) => e.trim()).toList();
-
-      // Ganti base URL dengan sesuai struktur API
       String baseUrl = 'https://kegiatanpendarungan.id/api/v1/proker/';
 
-      // Tambahkan URL dasar API
-      List<Widget> imageWidgets = imageUrls
-          .map(
-            (url) => Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Image.network(
-                baseUrl + url,
-                width: 200, // Sesuaikan lebar sesuai kebutuhan
-                height: 200, // Sesuaikan tinggi sesuai kebutuhan
-                fit: BoxFit.cover,
-              ),
-            ),
-          )
-          .toList();
+      List<Widget> imageWidgets = imageUrls.map((url) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Image.network(
+            baseUrl + url,
+            width: 200,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+        );
+      }).toList();
 
-      // Kembalikan kolom gambar
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -630,7 +665,6 @@ class DetailProgramKerja extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 4),
-          // Tampilkan gambar
           Column(
             children: imageWidgets,
           ),
@@ -699,8 +733,24 @@ class DetailProgramKerja extends StatelessWidget {
                       'Tanggal Pelaksanaan', prokerDetails['tanggal']),
                   buildDetailText('Realisasi Tanggal Pelaksanaan',
                       prokerDetails['tanggalRealisasi'] ?? 'Belum ada'),
-                  buildDetailText('Dokumentasi Program Kerja',
-                      prokerDetails['dokumentasi'] ?? 'Belum ada'),
+                  // ...
+                  Column(
+                    children: [
+                      buildDetailText('Dokumentasi Program Kerja',
+                          prokerDetails['dokumentasi'] ?? 'Belum ada'),
+                      SizedBox(height: 10),
+                      if (prokerDetails['dokumentasi'] != null)
+                        Image.network(
+                          'https://kegiatanpendarungan.id/api/v1/proker/${prokerDetails['dokumentasi']}',
+                          errorBuilder: (BuildContext context, Object exception,
+                              StackTrace? stackTrace) {
+                            // Tambahkan handling jika terjadi error ketika memuat gambar
+                            return Text('Gagal memuat gambar');
+                          },
+                        ),
+                    ],
+                  ),
+
                   SizedBox(height: 20),
                   // Tombol untuk menutup dialog
                   Row(

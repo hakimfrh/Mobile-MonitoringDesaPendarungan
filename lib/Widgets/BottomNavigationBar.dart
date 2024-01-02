@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:monitoringdesa_app/pages/login_page.dart';
-import 'package:monitoringdesa_app/pages/report.dart';
-import 'package:monitoringdesa_app/pages/sumberdana.dart';
-import 'package:monitoringdesa_app/pages/progress.dart';
-import 'package:monitoringdesa_app/pages/programkerja.dart';
-import 'package:monitoringdesa_app/pages/home_dashboard.dart';
-import 'package:monitoringdesa_app/pages/account.dart';
+import 'package:KegiatanPendarungan/pages/login_page.dart';
+import 'package:KegiatanPendarungan/pages/report.dart';
+import 'package:KegiatanPendarungan/pages/sumberdana.dart';
+import 'package:KegiatanPendarungan/pages/progress.dart';
+import 'package:KegiatanPendarungan/pages/programkerja.dart';
+import 'package:KegiatanPendarungan/pages/home_dashboard.dart';
+import 'package:KegiatanPendarungan/pages/account.dart';
 
 class MainLayout extends StatefulWidget {
   @override
