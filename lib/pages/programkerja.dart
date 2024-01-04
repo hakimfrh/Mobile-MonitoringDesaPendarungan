@@ -12,10 +12,11 @@ class Proker extends StatefulWidget {
 }
 
 class _ProkerState extends State<Proker> {
-  String selectedYear = "2023";
+String selectedYear = DateTime.now().year.toString();
   String searchText = '';
   List<dynamic> prokerData = [];
-  late List<Map<String, dynamic>> userData;
+  late List<Map<String, dynamic>> userData; 
+  
 
   @override
   void initState() {
@@ -86,15 +87,13 @@ class _ProkerState extends State<Proker> {
 // data untuk filter
   Future<void> fetchDataWithYear(String year) async {
     try {
-      final response = await http
-          .get(Uri.parse('https://kegiatanpendarungan.id/api/v1/proker'));
+      final response = await http.get(Uri.parse('https://kegiatanpendarungan.id/api/v1/proker'));
+
       if (response.statusCode == 200) {
         setState(() {
           List<dynamic> responseData = json.decode(response.body)['data'];
           prokerData = responseData
-              .where((proker) =>
-                  proker['tahunAnggaran'].toString() ==
-                  year) // Filter data berdasarkan tahun yang dipilih
+              .where((proker) => proker['tahunAnggaran'].toString() == year)
               .toList();
         });
       } else {
@@ -307,65 +306,46 @@ class _ProkerState extends State<Proker> {
                                                     width:
                                                         10), // Add some space between text and dropdown
                                                 // Dropdown button
-                                                Column(
+                                                 Column(
                                                   children: [
                                                     Container(
                                                       height: 40,
                                                       decoration: BoxDecoration(
                                                         color: Colors.black,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10),
+                                                        borderRadius: BorderRadius.circular(10),
                                                         border: Border.all(),
                                                       ),
-                                                      child: DropdownButton<
-                                                          String>(
-                                                        dropdownColor:
-                                                            Colors.black,
+                                                      child: DropdownButton<String>(
+                                                        dropdownColor: Colors.black,
                                                         value: selectedYear,
-                                                        onChanged:
-                                                            (String? newValue) {
+                                                        onChanged: (String? newValue) {
                                                           setState(() {
-                                                            selectedYear =
-                                                                newValue!;
-
-                                                            fetchDataWithYear(
-                                                                selectedYear);
+                                                            selectedYear = newValue!;
+                                                            fetchDataWithYear(selectedYear);
                                                           });
                                                         },
                                                         underline: Container(),
                                                         icon: Image.asset(
-                                                          'lib/assets/images/down-arrow.png', // Gantilah dengan nama dan ekstensi gambar yang sesuai
+                                                          'lib/assets/images/down-arrow.png',
                                                           width: 30,
                                                           height: 24,
                                                           color: Colors.white,
                                                         ),
-                                                        // alignment: Alignment.bottomCenter,
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 20,
-                                                                right: 7),
+                                                        padding: EdgeInsets.only(left: 20, right: 7),
                                                         items: List.generate(
-                                                                14,
-                                                                (index) =>
-                                                                    2023 -
-                                                                    index) // Generate tahun dari 2023 hingga 2010
-                                                            .map<
-                                                                    DropdownMenuItem<
-                                                                        String>>(
-                                                                (value) {
-                                                          return DropdownMenuItem<
-                                                              String>(
-                                                            value: value
-                                                                .toString(),
-                                                            child: Text(
-                                                              value.toString(),
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white),
-                                                            ),
-                                                          );
-                                                        }).toList(),
+                                                          DateTime.now().year - 2010 + 1,
+                                                          (index) => (DateTime.now().year - index).toString(),
+                                                        ).map<DropdownMenuItem<String>>(
+                                                          (value) {
+                                                            return DropdownMenuItem<String>(
+                                                              value: value,
+                                                              child: Text(
+                                                                value,
+                                                                style: TextStyle(color: Colors.white),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ).toList(),
                                                       ),
                                                     ),
                                                   ],

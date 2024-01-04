@@ -1,9 +1,8 @@
 import 'package:csv/csv.dart';
 import 'package:http/http.dart' as http;
-// import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'dart:io';
-// import 'package:downloads_path_provider/downloads_path_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> generateCSVFromAPI() async {
@@ -49,14 +48,16 @@ Future<void> generateCSVFromAPI() async {
 
       // Get the download directory
       Directory? downloadsDirectory;
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (Platform.isAndroid) {
         // Ask for storage permission if not granted yet
         var status = await Permission.storage.status;
         if (!status.isGranted) {
           await Permission.storage.request();
         }
 
-        downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
+        downloadsDirectory = await getExternalStorageDirectory();
+      } else if (Platform.isIOS) {
+        downloadsDirectory = await getApplicationDocumentsDirectory();
       }
 
       if (downloadsDirectory != null) {
@@ -77,3 +78,4 @@ Future<void> generateCSVFromAPI() async {
     print('Error creating CSV file: $e');
   }
 }
+

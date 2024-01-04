@@ -13,11 +13,12 @@ class progress extends StatefulWidget {
 }
 
 class _progressState extends State<progress> {
-  String selectedYear = "2023";
+  String selectedYear = DateTime.now().year.toString();
   String searchText = '';
   List<dynamic> prokerData = [];
   late List<Map<String, dynamic>> userData;
   late ProgramKerja programkerja;
+  List<String> yearsList = [];
 
   @override
   void initState() {
@@ -62,54 +63,73 @@ class _progressState extends State<progress> {
   }
 
 // data table
-  Future<List<ProgramKerja>> fetchDataTable() async {
-    try {
-      final response = await http
-          .get(Uri.parse('https://kegiatanpendarungan.id/api/v1/proker'));
+ Future<List<ProgramKerja>> fetchDataTable() async {
+  try {
+    final response = await http.get(Uri.parse('https://kegiatanpendarungan.id/api/v1/proker'));
 
-      if (response.statusCode == 200) {
-        final List<dynamic> responseData = json.decode(response.body)['data'];
+    if (response.statusCode == 200) {
+      final List<dynamic> responseData = json.decode(response.body)['data'];
 
-        List<dynamic> sortedResponseData = responseData
-            .where((element) => element['id'] != null)
-            .toList()
-          ..sort((a, b) => a['id'].compareTo(b['id']));
+      List<dynamic> sortedResponseData = responseData
+          .where((element) => element['id'] != null)
+          .toList()
+        ..sort((a, b) => a['id'].compareTo(b['id']));
 
-        List<ProgramKerja> programKerjas = sortedResponseData
-            .map((programJson) => ProgramKerja.fromJson(programJson))
-            .toList();
+      List<ProgramKerja> programKerjas = sortedResponseData
+          .map((programJson) => ProgramKerja.fromJson(programJson))
+          .toList();
 
-        return programKerjas;
-      } else {
-        throw Exception('Gagal memuat data');
-      }
-    } catch (error) {
-      print('Error fetching data: $error');
-      throw error;
+      // Ambil daftar tahun dari data API
+      Set<String> uniqueYears = programKerjas.map((proker) => proker.tahunAnggaran.toString()).toSet();
+      yearsList = uniqueYears.toList()..sort((a, b) => b.compareTo(a));
+
+      return programKerjas;
+    } else {
+      throw Exception('Gagal memuat data');
     }
+  } catch (error) {
+    print('Error fetching data: $error');
+    throw error;
   }
+}
 
   // data untuk filter
-  Future<void> fetchDataWithYear(String year) async {
-    try {
-      final response = await http
-          .get(Uri.parse('https://kegiatanpendarungan.id/api/v1/proker'));
-      if (response.statusCode == 200) {
+ Future<void> fetchDataWithYear(String year, String status) async {
+  try {
+    final response = await http.get(Uri.parse('https://kegiatanpendarungan.id/api/v1/proker'));
+    if (response.statusCode == 200) {
+      List<dynamic> responseData = json.decode(response.body)['data'];
+
+      // Mengganti cara cast data ke List<Map<String, dynamic>>
+      List<Map<String, dynamic>> processedData = List<Map<String, dynamic>>.from(responseData);
+
+      // Pengecekan apakah widget masih terpasang sebelum memanggil setState
+      if (mounted) {
+        // Ganti bagian ini sesuai dengan yang telah diperbaiki sebelumnya
         setState(() {
-          List<dynamic> responseData = json.decode(response.body)['data'];
-          prokerData = responseData
-              .where((proker) => proker['tahunAnggaran'].toString() == year)
-              .map((programJson) =>
-                  ProgramKerja.fromJson(programJson)) // Mapping to ProgramKerja
+          prokerData = processedData
+              .where((proker) =>
+                  proker['tahunAnggaran'].toString() == year &&
+                  (status == 'Semua Data' ||
+                      proker['status'].toUpperCase() == status.toUpperCase() ||
+                      (status == 'Proses' &&
+                          proker['status'].toUpperCase() == 'PROGRESS') ||
+                      (status == 'Selesai' &&
+                          proker['status'].toUpperCase() == 'SELESAI')))
+              .map((programJson) => ProgramKerja.fromJson(programJson))
               .toList();
+
+          // Tambahkan print statement untuk melihat hasil filter
+          print('Filtered Data: $prokerData');
         });
-      } else {
-        throw Exception('Failed to load data');
       }
-    } catch (error) {
-      print('Error fetching data: $error');
+    } else {
+      throw Exception('Failed to load data');
     }
+  } catch (error) {
+    print('Error fetching data: $error');
   }
+}
 
   // data untuk searching
   Future<void> fetchDataSearching() async {
@@ -340,44 +360,45 @@ class _progressState extends State<progress> {
                                                           setState(() {
                                                             selectedYear =
                                                                 newValue!;
-
-                                                            fetchDataWithYear(
-                                                                selectedYear);
+                                                           fetchDataWithYear(selectedYear, '');
                                                           });
                                                         },
                                                         underline: Container(),
                                                         icon: Image.asset(
-                                                          'lib/assets/images/down-arrow.png', // Gantilah dengan nama dan ekstensi gambar yang sesuai
+                                                          'lib/assets/images/down-arrow.png',
                                                           width: 30,
                                                           height: 24,
                                                           color: Colors.white,
                                                         ),
-                                                        // alignment: Alignment.bottomCenter,
                                                         padding:
                                                             EdgeInsets.only(
                                                                 left: 20,
                                                                 right: 7),
                                                         items: List.generate(
-                                                                14,
-                                                                (index) =>
-                                                                    2023 -
-                                                                    index) // Generate tahun dari 2023 hingga 2010
-                                                            .map<
-                                                                    DropdownMenuItem<
-                                                                        String>>(
-                                                                (value) {
-                                                          return DropdownMenuItem<
-                                                              String>(
-                                                            value: value
-                                                                .toString(),
-                                                            child: Text(
-                                                              value.toString(),
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white),
-                                                            ),
-                                                          );
-                                                        }).toList(),
+                                                          DateTime.now().year -
+                                                              2010 +
+                                                              1,
+                                                          (index) => (DateTime
+                                                                          .now()
+                                                                      .year -
+                                                                  index)
+                                                              .toString(),
+                                                        ).map<
+                                                            DropdownMenuItem<
+                                                                String>>(
+                                                          (value) {
+                                                            return DropdownMenuItem<
+                                                                String>(
+                                                              value: value,
+                                                              child: Text(
+                                                                value,
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ).toList(),
                                                       ),
                                                     ),
                                                   ],

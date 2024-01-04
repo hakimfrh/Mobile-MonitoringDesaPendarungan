@@ -12,7 +12,7 @@ class report extends StatefulWidget {
 }
 
 class _reportState extends State<report> {
-  String selectedYear = "2023";
+ String selectedYear = DateTime.now().year.toString();
   String searchText = '';
   String selectedStatus = 'Semua Data';
   late List<Map<String, dynamic>> userData;
@@ -282,75 +282,50 @@ class _reportState extends State<report> {
                                                 width:
                                                     10), // Add some space between text and dropdown
                                             // Dropdown button
-                                            Column(
-                                              children: [
-                                                Container(
-                                                  // width: ,
-                                                  height: 40,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    border: Border.all(),
-                                                  ),
-                                                  child: DropdownButton<String>(
-                                                    dropdownColor: Colors.black,
-                                                    value: selectedYear,
-                                                    onChanged:
-                                                        (String? newValue) {
-                                                      setState(() {
-                                                        selectedYear =
-                                                            newValue!;
-                                                        fetchDataWithYear(
-                                                            selectedYear);
-                                                      });
-                                                    },
-                                                    underline: Container(),
-                                                    icon: Image.asset(
-                                                      'lib/assets/images/down-arrow.png', // Gantilah dengan nama dan ekstensi gambar yang sesuai
-                                                      width: 30,
-                                                      height: 24,
-                                                      color: Colors.white,
-                                                    ),
-                                                    // alignment: Alignment.bottomCenter,
-                                                    padding: EdgeInsets.only(
-                                                        left: 20, right: 7),
-                                                    items: <String>[
-                                                      '2023',
-                                                      '2022',
-                                                      '2021',
-                                                      '2020',
-                                                      '2019',
-                                                      '2018',
-                                                      '2017',
-                                                      '2016',
-                                                      '2015',
-                                                      '2014',
-                                                      '2013',
-                                                      '2012',
-                                                      '2011',
-                                                      '2010',
-                                                      /* Add more years as needed */
-                                                    ].map<
-                                                            DropdownMenuItem<
-                                                                String>>(
-                                                        (String value) {
-                                                      return DropdownMenuItem<
-                                                          String>(
-                                                        value: value,
-                                                        child: Text(
-                                                          value,
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white),
+                                             Column(
+                                                  children: [
+                                                    Container(
+                                                      height: 40,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.black,
+                                                        borderRadius: BorderRadius.circular(10),
+                                                        border: Border.all(),
+                                                      ),
+                                                      child: DropdownButton<String>(
+                                                        dropdownColor: Colors.black,
+                                                        value: selectedYear,
+                                                        onChanged: (String? newValue) {
+                                                          setState(() {
+                                                            selectedYear = newValue!;
+                                                            fetchDataWithYear(selectedYear);
+                                                          });
+                                                        },
+                                                        underline: Container(),
+                                                        icon: Image.asset(
+                                                          'lib/assets/images/down-arrow.png',
+                                                          width: 30,
+                                                          height: 24,
+                                                          color: Colors.white,
                                                         ),
-                                                      );
-                                                    }).toList(),
-                                                  ),
+                                                        padding: EdgeInsets.only(left: 20, right: 7),
+                                                        items: List.generate(
+                                                          DateTime.now().year - 2010 + 1,
+                                                          (index) => (DateTime.now().year - index).toString(),
+                                                        ).map<DropdownMenuItem<String>>(
+                                                          (value) {
+                                                            return DropdownMenuItem<String>(
+                                                              value: value,
+                                                              child: Text(
+                                                                value,
+                                                                style: TextStyle(color: Colors.white),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ).toList(),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ],
-                                            ),
                                           ],
                                         ),
                                       ),
